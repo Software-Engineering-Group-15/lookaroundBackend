@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lookaroundBackend.entity.Comment;
 import lookaroundBackend.entity.Post;
@@ -16,13 +17,15 @@ public class CommentService {
     CommentRepository commentRepository;
 
     // 要求：User、Post都经过持久化(save)
+    @Transactional // 事务性要求
     public Comment createComment(User publisher, Post associatedPost, String textContent){
         Comment newComment = new Comment();
         newComment.setPublisher(publisher);
         newComment.setAssociatedPost(associatedPost);
         newComment.setPublishTime(LocalDateTime.now());
         newComment.setTextContent(textContent);
-        return commentRepository.save(newComment);
+        commentRepository.save(newComment);
+        return newComment;
     }
 
     public Comment findComment(Integer id){

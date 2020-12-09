@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lookaroundBackend.dao.UserRepository;
 import lookaroundBackend.entity.Comment;
@@ -11,6 +12,7 @@ import lookaroundBackend.entity.Post;
 import lookaroundBackend.entity.User;
 
 @Service
+@Transactional // 事务性要求
 public class UserService {
     @Autowired
     UserRepository userRepository;
@@ -24,25 +26,25 @@ public class UserService {
     public User createUser(String userName){ 
         User newUser = new User();
         newUser.setUserName(userName);
-        return userRepository.save(newUser);
+        userRepository.save(newUser);
+        return newUser;
     }
 
     public User findUser(Integer id){
         return userRepository.findById(id).get();
     }
 
-    public Post publishPost(Integer publisherId, String textContent, String publishLoction, Set<Byte[]> fileList){
-        User publisher = findUser(publisherId);
+    public Post publishPost(User publisher, String textContent, String publishLoction, Set<Byte[]> fileList){
         Post newPost = postService.createPost(publisher, textContent,publishLoction, fileList);
-        publisher.getPublishPostList().add(newPost);
+        publisher.addPost(newPost);
+        userRepository.save(publisher);
         return newPost;
     }
 
-    public Comment publishComment(Integer publisherId, Integer postId, String textContent){
-        User publisher = findUser(publisherId);
-        Post associatedPost = postService.findPost(postId);
+    public Comment publishComment(User publisher, Post associatedPost, String textContent){
         Comment newComment = postService.addComment(associatedPost, publisher, textContent);
-        publisher.getPublishCommentList().add(newComment);
+        publisher.addComment(newComment);
+        userRepository.save(publisher);
         return newComment;
     }
 

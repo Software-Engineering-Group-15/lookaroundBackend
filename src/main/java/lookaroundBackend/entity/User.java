@@ -1,5 +1,6 @@
 package lookaroundBackend.entity;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -18,51 +19,21 @@ public class User {
 
     private String userName;
 
-    @OneToMany(fetch = FetchType.EAGER, targetEntity = Post.class, mappedBy = "publisher")
-    private Set<Post> publishPostList = Set.of();
+    @OneToMany(fetch = FetchType.LAZY, targetEntity = Post.class, mappedBy = "publisher")
+    private Set<Post> publishPostList;
 
-    @OneToMany(fetch = FetchType.EAGER, targetEntity = Comment.class, mappedBy = "publisher")
-    private Set<Comment> publishCommentList = Set.of();
+    @OneToMany(fetch = FetchType.LAZY, targetEntity = Comment.class, mappedBy = "publisher")
+    private Set<Comment> publishCommentList;
 
-    public User(){}
+    public User(){
+        this.publishPostList = new HashSet<Post>(); 
+        this.publishCommentList = new HashSet<Comment>();
+    }
 
     @Override
     public String toString() {
         return "User [id=" + id + ", userName=" + userName + ", publishCommentList=" + publishCommentList + ", publishPostList=" + publishPostList
                 + "]";
-    }
-
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Set<Post> getPublishPostList() {
-        return publishPostList;
-    }
-
-    public void setPublishPostList(Set<Post> publishPostList) {
-        this.publishPostList = publishPostList;
-    }
-
-    public Set<Comment> getPublishCommentList() {
-        return publishCommentList;
-    }
-
-    public void setPublishCommentList(Set<Comment> publishCommentList) {
-        this.publishCommentList = publishCommentList;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
     }
 
     @Override
@@ -89,5 +60,45 @@ public class User {
             return false;
         return true;
     }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public Set<Post> getPublishPostList() {
+        return publishPostList;
+    }
+
+    public void setPublishPostList(Set<Post> publishPostList) {
+        this.publishPostList = publishPostList;
+    }
+
+    public Set<Comment> getPublishCommentList() {
+        return publishCommentList;
+    }
+
+    public void setPublishCommentList(Set<Comment> publishCommentList) {
+        this.publishCommentList = publishCommentList;
+    }
+
+	public boolean addPost(Post newPost) {
+        return this.publishPostList.add(newPost);
+	}
+
+	public boolean addComment(Comment newComment) {
+        return this.publishCommentList.add(newComment);
+	}
 
 }

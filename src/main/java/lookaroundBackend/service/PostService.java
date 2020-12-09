@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lookaroundBackend.dao.PostRepository;
 import lookaroundBackend.entity.Comment;
@@ -22,6 +23,7 @@ public class PostService {
     @Autowired 
     MultimediaService multimediaService;
 
+    @Transactional // 事务性要求
     public Post createPost(User publisher, String textContent,String publishLoction, Set<Byte[]> fileList){
         Post post = new Post();
         postRepository.save(post);
@@ -30,7 +32,8 @@ public class PostService {
         post.setPublishTime(LocalDateTime.now());
         post.setPublishLoction(publishLoction);
         post.setMultimediaContent(saveMultimediaContent(post,fileList));
-        return postRepository.save(post);
+        postRepository.save(post);
+        return post;
     }
 
     // 若id为null，抛出 IllegalArgumentException
@@ -43,9 +46,10 @@ public class PostService {
         return postRepository.findAll();
     }
 
+    @Transactional // 事务性要求
     public Comment addComment(Post associatedPost, User publisher, String textContent){
         Comment e = commentService.createComment(publisher, associatedPost, textContent);
-        associatedPost.getCommentList().add(e);
+        associatedPost.addComment(e);
         return e;
     }
 
