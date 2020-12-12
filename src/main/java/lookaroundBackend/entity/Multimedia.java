@@ -13,6 +13,7 @@ public class Multimedia {
     @Id 
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
+    
     private String url;
     
     @ManyToOne(fetch = FetchType.LAZY)

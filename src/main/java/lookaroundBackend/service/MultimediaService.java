@@ -43,7 +43,13 @@ class FileStoreSimulator{
     public String save(Byte[] file){
         // 假装把文件存到文件系统里
         cnt += 1;
+        // 返回文件的url
         return "url_" + cnt;
+    }
+
+    public Byte[] find(String url){
+        // 假装找到了文件并返回
+        return null;
     }
 
 }
