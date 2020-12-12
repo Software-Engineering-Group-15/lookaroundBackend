@@ -47,7 +47,7 @@ public class PostController {
             data.put("msg", "post not found");
             response = getResonse(300, data);
         }catch(Exception e){
-            data.put("msg", "error");
+            data.put("msg", e.getMessage());
             response = getResonse(300, data);
         }
         finally{
@@ -67,13 +67,14 @@ public class PostController {
              //need to discuss
             String location = newpost.get("location").get("long").toString()+" "+newpost.get("location").get("lat").toString();
             Post post = postService.createPost(newpost.get("publisher").get("userName"), newpost.get("text"), location, null);
+            
             //end
 
             data.put("msg", "success");
             response = getResonse(200, data);
         }catch(Exception e){
             data.clear();
-            data.put("msg", "error");
+            data.put("msg", e.getMessage());
             response = getResonse(300, data);
         }
         finally{
@@ -104,7 +105,7 @@ public class PostController {
         }
         catch(Exception e){
             data.clear();
-            data.put("msg","error");
+            data.put("msg",e.getMessage());
             response = getResonse(300, data);
         }finally{
             return response;
@@ -128,7 +129,7 @@ public class PostController {
         }
         catch(Exception e){
             data.clear();
-            data.put("msg","error");
+            data.put("msg",e.getMessage());
             response = getResonse(300, data);
         }finally{
             return response;
@@ -152,7 +153,7 @@ public class PostController {
         }
         catch(Exception e){
             data.clear();
-            data.put("msg","error");
+            data.put("msg",e.getMessage());
             response = getResonse(300, data);
         }finally{
             return response;
@@ -175,7 +176,7 @@ public class PostController {
             response = getResonse(200, data);
         }catch(Exception e){
             data.clear();
-            data.put("msg", "error");
+            data.put("msg", e.getMessage());
             response = getResonse(300, data);
         }
         finally{
@@ -208,7 +209,7 @@ public class PostController {
             response = getResonse(200, data);
         }catch(Exception e){
             data.clear();
-            data.put("msg", "error");
+            data.put("msg", e.getMessage());
             response = getResonse(300, data);
         }
         finally{
@@ -236,7 +237,7 @@ public class PostController {
         }
         catch(Exception e){
             data.clear();
-            data.put("msg","error");
+            data.put("msg",e.getMessage());
             response = getResonse(300, data);
         }finally{
             return response;
@@ -266,7 +267,7 @@ public class PostController {
             response = getResonse(200, data);
         }catch(Exception e){
             data.clear();
-            data.put("msg", "error");
+            data.put("msg", e.getMessage());
             response = getResonse(300, data);
         }
         finally{
