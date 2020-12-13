@@ -12,7 +12,7 @@ import lookaroundBackend.entity.User;
 import lookaroundBackend.dao.CommentRepository;
 
 @Service
-public class CommentService {
+class CommentService {
     @Autowired
     CommentRepository commentRepository;
 

@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import lookaroundBackend.entity.User;
-import lookaroundBackend.service.UserService;
+import lookaroundBackend.service.UserManageService;
 
 @RestController
 public class UserController {
 
     @Autowired
-    private UserService userService;
+    private UserManageService userManageService;
 
     //生成response
     private Map<String,Object> getResonse(Integer code, Map<String,Object> data){
@@ -27,10 +27,16 @@ public class UserController {
         response.put("data", data);
         return response;
     }
+
+
+    // TODO: 这部分要完全转交给spring security做，用转发实现
+
     // 登录
     @RequestMapping(value = "/user/login", method = RequestMethod.POST)
     @ResponseBody
     public Map<String,Object> login(@RequestBody Map<String,Object> newRequest) {
+
+        /*
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
         Map<String,Object> profile = new HashMap<String,Object>();
@@ -56,6 +62,8 @@ public class UserController {
         finally{
             return response;
         }
+        */
+        return null;
     }
 
     // 注册
@@ -70,26 +78,31 @@ public class UserController {
             String username = (String)newRequest.get("userName");
             String password = (String)newRequest.get("password");
 
-             //need to discuss
+            //need to discuss
             //User user = userService.createUser(email, username, password);
             //end
-            User user = new User();
+
+            // User user = new User();
+            User user = userManageService.registerAsUser(username, password);
 
             profile.put("userName", username);
             profile.put("userID", user.getId());
             data.put("msg", "success");
             data.put("profile", profile);
             response = getResonse(200, data);
+            return response;
+
         }catch(Exception e){
             data.clear();
             data.put("msg", e.getMessage());
             response = getResonse(300, data);
-        }
-        finally{
             return response;
+
         }
+
     }
 
+    // TODO: 确实意义不明
     // 注册验证（暂时意义不明）
     @RequestMapping(value = "/user/register/validation", method = RequestMethod.POST)
     @ResponseBody
@@ -106,17 +119,17 @@ public class UserController {
             //end
             User user = new User();
 
-            profile.put("userName", user.getUserName());
+            profile.put("userName", user.getUsername());
             profile.put("userID", user.getId());
             data.put("msg", "success");
             data.put("profile", profile);
             response = getResonse(200, data);
-        }catch(Exception e){
+            return response;
+
+        } catch (Exception e) {
             data.clear();
             data.put("msg", e.getMessage());
             response = getResonse(300, data);
-        }
-        finally{
             return response;
         }
     }
@@ -124,29 +137,29 @@ public class UserController {
     // 查看信息
     @RequestMapping(value = "/user/profile/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String,Object> register(@PathVariable(name = "id", required = true) Integer id) {
-        Map<String,Object> response = new HashMap<String,Object>();
-        Map<String,Object> data = new HashMap<String,Object>(); 
-        Map<String,Object> profile = new HashMap<String,Object>();
-        try{
+    public Map<String, Object> register(@PathVariable(name = "username", required = true) String username) {
+        Map<String, Object> response = new HashMap<String, Object>();
+        Map<String, Object> data = new HashMap<String, Object>();
+        Map<String, Object> profile = new HashMap<String, Object>();
+        try {
 
-             //need to discuss
-            User user = userService.findUser(id);
-            //end
+            // need to discuss
+            User user = userManageService.findByUsername(username);
+            // end
 
-            profile.put("userName", user.getUserName());
+            profile.put("userName", user.getUsername());
             profile.put("userID", user.getId());
             data.put("msg", "success");
             data.put("profile", profile);
             response = getResonse(200, data);
+             return response;
         }catch(Exception e){
             data.clear();
             data.put("msg", e.getMessage());
             response = getResonse(300, data);
-        }
-        finally{
             return response;
         }
+
     }
 
     // 修改个人信息
@@ -170,12 +183,11 @@ public class UserController {
             data.put("msg", "success");
             data.put("profile", profile);
             response = getResonse(200, data);
+            return response;
         }catch(Exception e){
             data.clear();
             data.put("msg", e.getMessage());
             response = getResonse(300, data);
-        }
-        finally{
             return response;
         }
     }

@@ -41,4 +41,10 @@ public class PublishService {
         userRepository.save(publisher);
         return newComment;
     }
+
+	public void publishPost(Object object, Object object2, String location, Object fileList) {
+	}
+
+	public void publishComment(Object object, Object object2, Object object3) {
+	}
 }

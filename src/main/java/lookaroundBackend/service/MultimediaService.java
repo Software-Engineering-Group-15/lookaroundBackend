@@ -8,7 +8,7 @@ import lookaroundBackend.entity.Multimedia;
 import lookaroundBackend.entity.Post;
 
 @Service
-public class MultimediaService {
+class MultimediaService {
     @Autowired
     MultimediaRepository multimediaRepository;
 

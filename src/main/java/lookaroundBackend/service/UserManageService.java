@@ -26,17 +26,14 @@ public class UserManageService implements UserDetailsService {
     @Autowired
     UserRepository userRepository;
 
-    @Autowired
-    PostService postService;
 
-    @Autowired
-    CommentService commentService;
-
-    public User createUser(String userName, String password) {
-        User newUser = new User(userName, password);
-        userRepository.save(newUser);
-        return newUser;
-    }
+    public User findByUsername(String username) throws UsernameNotFoundException{
+        User user = userRepository.findByUsername(username);
+        if (user == null){
+            throw new UsernameNotFoundException("Username \"" + username + "\" Not Found");
+        }
+        return user;    
+    } 
 
     public User registerAsUser(String username, String password){
         Set<GrantedAuthority> authorities = new HashSet<>();
@@ -46,23 +43,9 @@ public class UserManageService implements UserDetailsService {
         return newUser;
     }
 
-    public User registerAsAdmin(String username, String password){
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        authorities.add(EnumGrantedAuthority.USER);
-        authorities.add(EnumGrantedAuthority.ADMIN);
-        User newUser = new User(username, password, authorities);
-        userRepository.save(newUser);
-        return newUser;
-    }
-
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDetails user = userRepository.findByUsername(username);
-        if (user == null){
-            throw new UsernameNotFoundException("Username \"" + username + "\" Not Found");
-        }
-        return user;
+        return (UserDetails) findByUsername(username);
     }
 
 }

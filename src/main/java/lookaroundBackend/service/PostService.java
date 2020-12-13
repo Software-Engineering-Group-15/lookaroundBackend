@@ -15,7 +15,7 @@ import lookaroundBackend.entity.Post;
 import lookaroundBackend.entity.User;
 
 @Service
-public class PostService {
+class PostService {
     @Autowired
     private PostRepository postRepository;
     @Autowired
@@ -38,7 +38,7 @@ public class PostService {
 
     // 若id为null，抛出 IllegalArgumentException
     // 若结果为空，抛出 NoSuchElementException
-    public Post findPost(Integer id){
+    public Post findPost(Integer id) throws Exception{
         return postRepository.findById(id).get();
     }    
 

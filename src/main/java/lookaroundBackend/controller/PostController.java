@@ -15,16 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lookaroundBackend.entity.Comment;
 import lookaroundBackend.entity.Post;
-import lookaroundBackend.service.CommentService;
-import lookaroundBackend.service.PostService;
+import lookaroundBackend.service.PublishService;
+import lookaroundBackend.service.SearchService;
 
 @RestController
 public class PostController {
     @Autowired
-    private PostService postService;
+    private SearchService searchService;
 
     @Autowired
-    private CommentService commentService;
+    private PublishService publishService;
 
     //生成response
     private Map<String,Object> getResonse(Integer code, Map<String,Object> data){
@@ -41,20 +41,21 @@ public class PostController {
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
         try{
-            Post post = postService.findPost(post_id);
+            Post post = searchService.findPost(post_id);
             data.put("post", post);
             response = getResonse(200, data);
+            return response;
         }catch(NoSuchElementException e){
             data.clear();
             data.put("msg", "post not found");
             response = getResonse(300, data);
+            return response;
         }catch(Exception e){
             data.put("msg", e.getMessage());
             response = getResonse(300, data);
-        }
-        finally{
             return response;
         }
+
     }
 
     // 上传Post
@@ -67,20 +68,21 @@ public class PostController {
             Map<String,Object> newpost = (Map<String,Object>)newRequest.get("post");
             Map<String,Object> locationMap = (Map<String,Object>)newRequest.get("location");
             Map<String,Object> publisherMap = (Map<String,Object>)newRequest.get("publisher");
+
              //need to discuss
             String location = locationMap.get("long").toString()+" "+locationMap.get("lat").toString();
             //Post post = postService.createPost(publisherMap.get("userName"), newpost.get("text"), location, null);
             
+            publishService.publishPost(publisherMap.get("userName"), newpost.get("text"), location, null);
             //end
 
             data.put("msg", "success");
             response = getResonse(200, data);
+            return response;
         }catch(Exception e){
             data.clear();
             data.put("msg", e.getMessage());
             response = getResonse(300, data);
-        }
-        finally{
             return response;
         }
     }
@@ -100,17 +102,21 @@ public class PostController {
             if(start == null) start = 1;
             
             //need to discuss
-            Comment comment = commentService.findComment(post_id);
+            Post post = searchService.findPost(post_id);
+
+            // TODO: JPA要求用SET实现CommentList。所以limit的要求有些尴尬
+
+            commentList.addAll(post.getCommentList());
             data.put("commentList", commentList);
             //end
 
             response = getResonse(200, data);
+            return response;
         }
         catch(Exception e){
             data.clear();
             data.put("msg",e.getMessage());
             response = getResonse(300, data);
-        }finally{
             return response;
         }
     }
@@ -123,18 +129,19 @@ public class PostController {
         Map<String,Object> data = new HashMap<String,Object>(); 
         try{
 
+            // TODO: 实现点赞功能需要从数据层开始，报告之前暂时放置吧
             //need to discuss
             //commentSerive.favor(id);
             //end
 
             data.put("msg", "success");
             response = getResonse(200, data);
+            return response;
         }
         catch(Exception e){
             data.clear();
             data.put("msg",e.getMessage());
             response = getResonse(300, data);
-        }finally{
             return response;
         }
     }
@@ -151,14 +158,16 @@ public class PostController {
             //Comment comment = commentService.createComment(newRequest.get("userName"), newRequest.get("postID"), newRequest.get("text"));
             //end
 
+            publishService.publishComment(newRequest.get("userName"), newRequest.get("postID"), newRequest.get("text"));
+
             data.put("msg", "success");
             response = getResonse(200, data);
+            return response;
         }
         catch(Exception e){
             data.clear();
             data.put("msg",e.getMessage());
             response = getResonse(300, data);
-        }finally{
             return response;
         }
     }
@@ -177,14 +186,14 @@ public class PostController {
 
             data.put("msg", "success");
             response = getResonse(200, data);
+            return response;
         }catch(Exception e){
             data.clear();
             data.put("msg", e.getMessage());
             response = getResonse(300, data);
-        }
-        finally{
             return response;
         }
+
     }
 
     //查看动态（时间顺序）
@@ -204,20 +213,20 @@ public class PostController {
             if(comments == null) comments = 10;
 
              //need to discuss
-            //postList = postService.getPostByTime(limit,start,comments);
+            postList = searchService.getPostByTime(limit,start,comments);
             //end
 
             data.put("downloadCount", postList.size());
             data.put("posts", postList);
             response = getResonse(200, data);
+            return response;
         }catch(Exception e){
             data.clear();
             data.put("msg", e.getMessage());
             response = getResonse(300, data);
-        }
-        finally{
             return response;
         }
+
     }
 
      // 查看动态（按照所在地）
@@ -231,18 +240,18 @@ public class PostController {
             Map<String,Object> locationMap = (Map<String,Object>)newRequest.get("location");
             //need to discuss
             String location = locationMap.get("long").toString()+" "+locationMap.get("lat").toString();
-            //postList = postService.getPostByLocation(location, newRequest.get("limit"), newRequest.get("range"));
+            postList = searchService.getPostByLocation(location, newRequest.get("limit"), newRequest.get("range"));
             //end
 
             data.put("downloadCount", postList.size());
             data.put("postList", postList);
             response = getResonse(200, data);
+            return response;
         }
         catch(Exception e){
             data.clear();
             data.put("msg",e.getMessage());
             response = getResonse(300, data);
-        }finally{
             return response;
         }
     }
@@ -261,20 +270,20 @@ public class PostController {
         try{
             if(userid == null) userid = -1;
             if(comments == null) comments = 10;
-             //need to discuss
-            //postList = postService.searchPost(userid, keyword, comments);
+            //need to discuss
+            postList = searchService.searchPost(userid, keyword, comments);
             //end
 
             data.put("downloadCount", postList.size());
             data.put("posts", postList);
             response = getResonse(200, data);
+            return response;
         }catch(Exception e){
             data.clear();
             data.put("msg", e.getMessage());
             response = getResonse(300, data);
-        }
-        finally{
             return response;
         }
+
     }
 }
