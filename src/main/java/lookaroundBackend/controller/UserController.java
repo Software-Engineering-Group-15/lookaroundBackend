@@ -75,8 +75,8 @@ public class UserController {
         Map<String,Object> profile = new HashMap<String,Object>();
         try{
             String email = newRequest.get("email") + "@pku.edu.cn";
-            String username = (String)newRequest.get("userName");
-            String password = (String)newRequest.get("password");
+            String username = newRequest.get("userName").toString();
+            String password = newRequest.get("password").toString();
 
             //need to discuss
             //User user = userService.createUser(email, username, password);
@@ -135,7 +135,7 @@ public class UserController {
     }
 
     // 查看信息
-    @RequestMapping(value = "/user/profile/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/user/profile/{username}", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> register(@PathVariable(name = "username", required = true) String username) {
         Map<String, Object> response = new HashMap<String, Object>();
@@ -171,7 +171,7 @@ public class UserController {
         Map<String,Object> profile = new HashMap<String,Object>();
         try{
             Integer id = (Integer)newRequest.get("userID");
-            String username = (String)newRequest.get("username");
+            String username = newRequest.get("username").toString();
 
             //need to discuss
             //User user = userService.changeUser(id, username);

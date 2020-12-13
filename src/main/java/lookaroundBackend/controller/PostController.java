@@ -89,7 +89,7 @@ public class PostController {
 
     // 请求动态评论
     @RequestMapping(value = {"/post/comments/{post_id}/{limit}/{start}","/post/comments/{post_id}",
-        "/posts/comments/{post_id}/{limit}","/posts/comments/{post_id}/{start}"}, method = RequestMethod.GET)
+        "/posts/comments/{post_id}/{limit}"}, method = RequestMethod.GET)
     @ResponseBody
     public Map<String,Object> getComment(@PathVariable(name = "post_id", required = true) Integer post_id,
                                         @PathVariable(name = "limit") Integer limit,
@@ -127,6 +127,7 @@ public class PostController {
     public Map<String,Object> newFavor(@RequestBody Integer id){
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
+        return getResonse(404, data);
         try{
 
             // TODO: 实现点赞功能需要从数据层开始，报告之前暂时放置吧
@@ -198,8 +199,7 @@ public class PostController {
 
     //查看动态（时间顺序）
     @RequestMapping(value = {"/posts/time/{limit}/{start}/{comments}","/posts",
-        "/posts/{limit}","/posts/{start}","/posts/{comments}","/post/{limit}/{start}",
-        "/posts/{limit}/{comments}","/posts/{start}/{comments}"}, method = RequestMethod.GET)
+        "/posts/time/{limit}","/post/time/{limit}/{start}"}, method = RequestMethod.GET)
     @ResponseBody
     public Map<String,Object> getPostByTime(@PathVariable(name = "limit",required = false) Integer limit,
                                             @PathVariable(name = "start",required = false) Integer start,
@@ -258,10 +258,9 @@ public class PostController {
 
     //搜索动态
     @RequestMapping(value = {"/posts/search/{userid}/{keyword}/{comments}",
-        "/posts/search/{userid}","/posts/search/{keyword}","/posts/search/{userid}/{keyword}",
-        "/posts/search/{userid}/{comments}","/posts/search/{keyword}/{comments}"}, method = RequestMethod.GET)
+        "/posts/search/{userid}","/posts/search/{userid}/{keyword}"}, method = RequestMethod.GET)
     @ResponseBody
-    public Map<String,Object> searchPost(@PathVariable(name = "userid",required = false) Integer userid,
+    public Map<String,Object> searchPost(@PathVariable(name = "userid",required = true) Integer userid,
                                         @PathVariable(name = "keyword",required = false) String keyword,
                                         @PathVariable(name = "comments",required = false) Integer comments) {
         Map<String,Object> response = new HashMap<String,Object>();
@@ -270,6 +269,7 @@ public class PostController {
         try{
             if(userid == null) userid = -1;
             if(comments == null) comments = 10;
+            if(keyword == null || keyword.equals("#")) keyword = null;
             //need to discuss
             postList = searchService.searchPost(userid, keyword, comments);
             //end
