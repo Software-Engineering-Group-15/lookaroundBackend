@@ -63,7 +63,7 @@ public class UserController {
             return response;
         }
         */
-        return null;
+        return getResonse(300, new HashMap<String,Object>());
     }
 
     // 注册
@@ -74,7 +74,7 @@ public class UserController {
         Map<String,Object> data = new HashMap<String,Object>(); 
         Map<String,Object> profile = new HashMap<String,Object>();
         try{
-            String email = newRequest.get("email") + "@pku.edu.cn";
+            String email = newRequest.get("email").toString() + "@pku.edu.cn";
             String username = newRequest.get("userName").toString();
             String password = newRequest.get("password").toString();
 
@@ -111,8 +111,8 @@ public class UserController {
         Map<String,Object> data = new HashMap<String,Object>(); 
         Map<String,Object> profile = new HashMap<String,Object>();
         try{
-            String email = newRequest.get("email") + "@pku.edu.cn";
-            String code = (String)newRequest.get("verificationCode");
+            String email = newRequest.get("email").toString() + "@pku.edu.cn";
+            String code = newRequest.get("verificationCode").toString();
 
              //need to discuss
             //...
@@ -170,7 +170,7 @@ public class UserController {
         Map<String,Object> data = new HashMap<String,Object>(); 
         Map<String,Object> profile = new HashMap<String,Object>();
         try{
-            Integer id = (Integer)newRequest.get("userID");
+            Integer id = Integer.parseInt(newRequest.get("userID").toString());
             String username = newRequest.get("username").toString();
 
             //need to discuss

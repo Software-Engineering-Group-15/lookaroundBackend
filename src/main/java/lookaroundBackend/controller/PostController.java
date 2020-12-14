@@ -73,7 +73,7 @@ public class PostController {
             String location = locationMap.get("long").toString()+" "+locationMap.get("lat").toString();
             //Post post = postService.createPost(publisherMap.get("userName"), newpost.get("text"), location, null);
             
-            publishService.publishPost(publisherMap.get("userName"), newpost.get("text"), location, null);
+            publishService.publishPost(publisherMap.get("userName").toString(), newpost.get("text").toString(), location, null);
             //end
 
             data.put("msg", "success");
@@ -127,7 +127,6 @@ public class PostController {
     public Map<String,Object> newFavor(@RequestBody Integer id){
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
-        return getResonse(404, data);
         try{
 
             // TODO: 实现点赞功能需要从数据层开始，报告之前暂时放置吧
@@ -155,12 +154,11 @@ public class PostController {
         Map<String,Object> data = new HashMap<String,Object>(); 
         try{
 
-            //need to discuss
-            //Comment comment = commentService.createComment(newRequest.get("userName"), newRequest.get("postID"), newRequest.get("text"));
-            //end
-
-            publishService.publishComment(newRequest.get("userName"), newRequest.get("postID"), newRequest.get("text"));
-
+            /*  publishComment(String, Integer, String)
+            publishService.publishComment(newRequest.get("userName").toString(), 
+                                        Integer.parseInt(newRequest.get("postID").toString()), 
+                                        newRequest.get("text").toString());
+            */
             data.put("msg", "success");
             response = getResonse(200, data);
             return response;
@@ -240,7 +238,8 @@ public class PostController {
             Map<String,Object> locationMap = (Map<String,Object>)newRequest.get("location");
             //need to discuss
             String location = locationMap.get("long").toString()+" "+locationMap.get("lat").toString();
-            postList = searchService.getPostByLocation(location, newRequest.get("limit"), newRequest.get("range"));
+            postList = searchService.getPostByLocation(location, Integer.parseInt(newRequest.get("limit").toString()), 
+                                                        Integer.parseInt(newRequest.get("range").toString()));
             //end
 
             data.put("downloadCount", postList.size());
