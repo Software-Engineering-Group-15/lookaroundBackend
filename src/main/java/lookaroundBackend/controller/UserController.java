@@ -78,10 +78,6 @@ public class UserController {
             String username = newRequest.get("userName").toString();
             String password = newRequest.get("password").toString();
 
-            //need to discuss
-            //User user = userService.createUser(email, username, password);
-            //end
-
             // User user = new User();
             User user = userManageService.registerAsUser(username, password);
 

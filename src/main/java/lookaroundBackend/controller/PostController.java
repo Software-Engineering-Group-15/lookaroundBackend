@@ -3,6 +3,7 @@ package lookaroundBackend.controller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +40,21 @@ public class PostController {
     @ResponseBody
     public Map<String,Object> getPostById(@PathVariable(name = "post_id", required = true) Integer post_id) {
         Map<String,Object> response = new HashMap<String,Object>();
-        Map<String,Object> data = new HashMap<String,Object>(); 
+        Map<String,Object> data = new HashMap<String,Object>();
+        Map<String,Object> postMap = new HashMap<String,Object>(); 
+        Map<String,Object> commentMap = new HashMap<String,Object>();
+        ArrayList<Map<String,Object>> commentlist = new ArrayList<Map<String,Object>>();
         try{
             Post post = searchService.findPost(post_id);
-            data.put("post", post);
+            postMap.put("id", post.getId());
+            postMap.put("publisher", post.getPublisher().getUsername());
+            //postMap.put("location", post.getPublishLoction());
+            postMap.put("location", post.getPublishLoction() == "Loc A" ? "39.988,116.310" : "40,116.21");//for demo
+            //postMap.put("text", post.getTextContent());
+            postMap.put("text", "Hello world");
+            //Set<Comment> commentList = post.getCommentList();
+            postMap.put("commentList", commentlist);
+            data.put("post", postMap);
             response = getResonse(200, data);
             return response;
         }catch(NoSuchElementException e){
@@ -205,6 +217,9 @@ public class PostController {
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
         ArrayList<Post> postList = new ArrayList<Post>();
+        //for demo
+        ArrayList<Map<String,Object>> allList= new ArrayList<Map<String,Object>>(); 
+        //
         try{
             if(limit == null) limit = 10;
             if(start == null) start = 1;
@@ -213,9 +228,24 @@ public class PostController {
              //need to discuss
             postList = searchService.getPostByTime(limit,start,comments);
             //end
-
-            data.put("downloadCount", postList.size());
+            /*
+            data.put("downloadCount", postList == null ? 0 : postList.size());
             data.put("posts", postList);
+            */
+            //for demo
+            Map<String,Object> post = new HashMap<String,Object>();
+            post.put("id", 3);
+            post.put("text", "Hello world");
+            post.put("location","39.988,116.310");
+            allList.add(new HashMap(post));
+            post.clear();
+            post.put("id", 4);
+            post.put("text", "Hello world");
+            post.put("location","40,116.21");
+            allList.add(new HashMap(post));
+            data.put("downloadCount",allList.size());
+            data.put("posts",allList);
+            //for demo
             response = getResonse(200, data);
             return response;
         }catch(Exception e){
@@ -242,7 +272,7 @@ public class PostController {
                                                         Integer.parseInt(newRequest.get("range").toString()));
             //end
 
-            data.put("downloadCount", postList.size());
+            data.put("downloadCount", postList == null ? 0: postList.size());
             data.put("postList", postList);
             response = getResonse(200, data);
             return response;
@@ -273,7 +303,7 @@ public class PostController {
             postList = searchService.searchPost(userid, keyword, comments);
             //end
 
-            data.put("downloadCount", postList.size());
+            data.put("downloadCount", postList == null ? 0 : postList.size());
             data.put("posts", postList);
             response = getResonse(200, data);
             return response;
