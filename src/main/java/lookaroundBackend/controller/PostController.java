@@ -3,6 +3,7 @@ package lookaroundBackend.controller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +40,21 @@ public class PostController {
     @ResponseBody
     public Map<String,Object> getPostById(@PathVariable(name = "post_id", required = true) Integer post_id) {
         Map<String,Object> response = new HashMap<String,Object>();
-        Map<String,Object> data = new HashMap<String,Object>(); 
+        Map<String,Object> data = new HashMap<String,Object>();
+        Map<String,Object> postMap = new HashMap<String,Object>(); 
+        Map<String,Object> commentMap = new HashMap<String,Object>();
+        ArrayList<Map<String,Object>> commentlist = new ArrayList<Map<String,Object>>();
         try{
             Post post = searchService.findPost(post_id);
-            data.put("post", post);
+            postMap.put("id", post.getId());
+            postMap.put("publisher", post.getPublisher().getUsername());
+            //postMap.put("location", post.getPublishLoction());
+            postMap.put("location", post.getPublishLoction() == "Loc A" ? "39.988,116.310" : "40,116.21");//for demo
+            //postMap.put("text", post.getTextContent());
+            postMap.put("text", "Hello world");
+            //Set<Comment> commentList = post.getCommentList();
+            postMap.put("commentList", commentlist);
+            data.put("post", postMap);
             response = getResonse(200, data);
             return response;
         }catch(NoSuchElementException e){
@@ -73,7 +85,7 @@ public class PostController {
             String location = locationMap.get("long").toString()+" "+locationMap.get("lat").toString();
             //Post post = postService.createPost(publisherMap.get("userName"), newpost.get("text"), location, null);
             
-            publishService.publishPost(publisherMap.get("userName"), newpost.get("text"), location, null);
+            publishService.publishPost(publisherMap.get("userName").toString(), newpost.get("text").toString(), location, null);
             //end
 
             data.put("msg", "success");
@@ -89,7 +101,7 @@ public class PostController {
 
     // 请求动态评论
     @RequestMapping(value = {"/post/comments/{post_id}/{limit}/{start}","/post/comments/{post_id}",
-        "/posts/comments/{post_id}/{limit}","/posts/comments/{post_id}/{start}"}, method = RequestMethod.GET)
+        "/posts/comments/{post_id}/{limit}"}, method = RequestMethod.GET)
     @ResponseBody
     public Map<String,Object> getComment(@PathVariable(name = "post_id", required = true) Integer post_id,
                                         @PathVariable(name = "limit") Integer limit,
@@ -154,12 +166,11 @@ public class PostController {
         Map<String,Object> data = new HashMap<String,Object>(); 
         try{
 
-            //need to discuss
-            //Comment comment = commentService.createComment(newRequest.get("userName"), newRequest.get("postID"), newRequest.get("text"));
-            //end
-
-            publishService.publishComment(newRequest.get("userName"), newRequest.get("postID"), newRequest.get("text"));
-
+            /*  publishComment(String, Integer, String)
+            publishService.publishComment(newRequest.get("userName").toString(), 
+                                        Integer.parseInt(newRequest.get("postID").toString()), 
+                                        newRequest.get("text").toString());
+            */
             data.put("msg", "success");
             response = getResonse(200, data);
             return response;
@@ -198,8 +209,7 @@ public class PostController {
 
     //查看动态（时间顺序）
     @RequestMapping(value = {"/posts/time/{limit}/{start}/{comments}","/posts",
-        "/posts/{limit}","/posts/{start}","/posts/{comments}","/post/{limit}/{start}",
-        "/posts/{limit}/{comments}","/posts/{start}/{comments}"}, method = RequestMethod.GET)
+        "/posts/time/{limit}","/post/time/{limit}/{start}"}, method = RequestMethod.GET)
     @ResponseBody
     public Map<String,Object> getPostByTime(@PathVariable(name = "limit",required = false) Integer limit,
                                             @PathVariable(name = "start",required = false) Integer start,
@@ -207,6 +217,9 @@ public class PostController {
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
         ArrayList<Post> postList = new ArrayList<Post>();
+        //for demo
+        ArrayList<Map<String,Object>> allList= new ArrayList<Map<String,Object>>(); 
+        //
         try{
             if(limit == null) limit = 10;
             if(start == null) start = 1;
@@ -215,9 +228,24 @@ public class PostController {
              //need to discuss
             postList = searchService.getPostByTime(limit,start,comments);
             //end
-
-            data.put("downloadCount", postList.size());
+            /*
+            data.put("downloadCount", postList == null ? 0 : postList.size());
             data.put("posts", postList);
+            */
+            //for demo
+            Map<String,Object> post = new HashMap<String,Object>();
+            post.put("id", 3);
+            post.put("text", "Hello world");
+            post.put("location","39.988,116.310");
+            allList.add(new HashMap(post));
+            post.clear();
+            post.put("id", 4);
+            post.put("text", "Hello world");
+            post.put("location","40,116.21");
+            allList.add(new HashMap(post));
+            data.put("downloadCount",allList.size());
+            data.put("posts",allList);
+            //for demo
             response = getResonse(200, data);
             return response;
         }catch(Exception e){
@@ -240,10 +268,11 @@ public class PostController {
             Map<String,Object> locationMap = (Map<String,Object>)newRequest.get("location");
             //need to discuss
             String location = locationMap.get("long").toString()+" "+locationMap.get("lat").toString();
-            postList = searchService.getPostByLocation(location, newRequest.get("limit"), newRequest.get("range"));
+            postList = searchService.getPostByLocation(location, Integer.parseInt(newRequest.get("limit").toString()), 
+                                                        Integer.parseInt(newRequest.get("range").toString()));
             //end
 
-            data.put("downloadCount", postList.size());
+            data.put("downloadCount", postList == null ? 0: postList.size());
             data.put("postList", postList);
             response = getResonse(200, data);
             return response;
@@ -258,10 +287,9 @@ public class PostController {
 
     //搜索动态
     @RequestMapping(value = {"/posts/search/{userid}/{keyword}/{comments}",
-        "/posts/search/{userid}","/posts/search/{keyword}","/posts/search/{userid}/{keyword}",
-        "/posts/search/{userid}/{comments}","/posts/search/{keyword}/{comments}"}, method = RequestMethod.GET)
+        "/posts/search/{userid}","/posts/search/{userid}/{keyword}"}, method = RequestMethod.GET)
     @ResponseBody
-    public Map<String,Object> searchPost(@PathVariable(name = "userid",required = false) Integer userid,
+    public Map<String,Object> searchPost(@PathVariable(name = "userid",required = true) Integer userid,
                                         @PathVariable(name = "keyword",required = false) String keyword,
                                         @PathVariable(name = "comments",required = false) Integer comments) {
         Map<String,Object> response = new HashMap<String,Object>();
@@ -270,11 +298,12 @@ public class PostController {
         try{
             if(userid == null) userid = -1;
             if(comments == null) comments = 10;
+            if(keyword == null || keyword.equals("#")) keyword = null;
             //need to discuss
             postList = searchService.searchPost(userid, keyword, comments);
             //end
 
-            data.put("downloadCount", postList.size());
+            data.put("downloadCount", postList == null ? 0 : postList.size());
             data.put("posts", postList);
             response = getResonse(200, data);
             return response;

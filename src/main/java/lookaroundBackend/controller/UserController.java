@@ -35,7 +35,35 @@ public class UserController {
     @RequestMapping(value = "/user/login", method = RequestMethod.POST)
     @ResponseBody
     public Map<String,Object> login(@RequestBody Map<String,Object> newRequest) {
-        return null;
+
+        /*
+        Map<String,Object> response = new HashMap<String,Object>();
+        Map<String,Object> data = new HashMap<String,Object>(); 
+        Map<String,Object> profile = new HashMap<String,Object>();
+        try{
+            String username = (String)newRequest.get("userName");
+            String password = (String)newRequest.get("password");
+
+             //need to discuss
+            //User user = userService.login(username, password);
+            //end
+            User user = new User();
+
+            profile.put("userName", username);
+            profile.put("userID", user.getId());
+            data.put("msg", "success");
+            data.put("profile", profile);
+            response = getResonse(200, data);
+        }catch(Exception e){
+            data.clear();
+            data.put("msg", e.getMessage());
+            response = getResonse(300, data);
+        }
+        finally{
+            return response;
+        }
+        */
+        return getResonse(300, new HashMap<String,Object>());
     }
 
     // 注册
@@ -46,13 +74,9 @@ public class UserController {
         Map<String,Object> data = new HashMap<String,Object>(); 
         Map<String,Object> profile = new HashMap<String,Object>();
         try{
-            String email = newRequest.get("email") + "@pku.edu.cn";
-            String username = (String)newRequest.get("userName");
-            String password = (String)newRequest.get("password");
-
-            //need to discuss
-            //User user = userService.createUser(email, username, password);
-            //end
+            String email = newRequest.get("email").toString() + "@pku.edu.cn";
+            String username = newRequest.get("userName").toString();
+            String password = newRequest.get("password").toString();
 
             // User user = new User();
             User user = userManageService.registerAsUser(username, password);
@@ -83,8 +107,8 @@ public class UserController {
         Map<String,Object> data = new HashMap<String,Object>(); 
         Map<String,Object> profile = new HashMap<String,Object>();
         try{
-            String email = newRequest.get("email") + "@pku.edu.cn";
-            String code = (String)newRequest.get("verificationCode");
+            String email = newRequest.get("email").toString() + "@pku.edu.cn";
+            String code = newRequest.get("verificationCode").toString();
 
              //need to discuss
             //...
@@ -107,7 +131,7 @@ public class UserController {
     }
 
     // 查看信息
-    @RequestMapping(value = "/user/profile/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/user/profile/{username}", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> register(@PathVariable(name = "username", required = true) String username) {
         Map<String, Object> response = new HashMap<String, Object>();
@@ -142,8 +166,8 @@ public class UserController {
         Map<String,Object> data = new HashMap<String,Object>(); 
         Map<String,Object> profile = new HashMap<String,Object>();
         try{
-            Integer id = (Integer)newRequest.get("userID");
-            String username = (String)newRequest.get("username");
+            Integer id = Integer.parseInt(newRequest.get("userID").toString());
+            String username = newRequest.get("username").toString();
 
             //need to discuss
             //User user = userService.changeUser(id, username);
