@@ -22,7 +22,7 @@ RESTful接口，返回"hello，world"字符串
 ```JSON
 {
     ...
-    "Authorization": "Bearer " + " " + JWT
+    "Authorization": "Bearer JWT" 
     ...
 }
 ```

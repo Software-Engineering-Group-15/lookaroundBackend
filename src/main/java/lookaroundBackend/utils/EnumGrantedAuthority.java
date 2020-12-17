@@ -1,5 +1,8 @@
 package lookaroundBackend.utils;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.springframework.security.core.GrantedAuthority;
 
 /**
@@ -24,6 +27,19 @@ public enum EnumGrantedAuthority implements GrantedAuthority{
     @Override
     public String getAuthority() {
         return authority;
+    }
+
+    public static Collection<GrantedAuthority> rolesToAuthorities(Collection<String> roles){
+        List<GrantedAuthority> authorities = List.of();
+        for(String role: roles){
+            if(role.equals(USER.getAuthority())){
+                authorities.add(EnumGrantedAuthority.USER);
+            }
+            if(role.equals(ADMIN.getAuthority())){
+                authorities.add(EnumGrantedAuthority.ADMIN);
+            }
+        }        
+        return authorities;
     }
 
 }
