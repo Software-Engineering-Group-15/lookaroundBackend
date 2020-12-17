@@ -138,7 +138,7 @@ public class PostController {
             Post post = searchService.findPost(post_id);
 
             // TODO: JPA要求用SET实现CommentList。所以limit的要求有些尴尬
-            if(post == null) throw NullPointerException;
+            if(post == null) throw new NullPointerException("no post found");
             Set<Comment> commentlist = post.getCommentList();
             if(commentList == null) data.put("commentList", null);
             else{
@@ -150,11 +150,6 @@ public class PostController {
             //end
 
             response = getResonse(200, data);
-            return response;
-        }catch(NullPointerException e){
-            data.clear();
-            data.put("msg", "no post found");
-            response = getResonse(300, data);
             return response;
         }catch(Exception e){
             data.clear();
@@ -257,7 +252,7 @@ public class PostController {
              //need to discuss
             postList = searchService.getPostByTime(limit,start,comments);
             //end
-            if(postList == null) throw NullPointerException;
+            if(postList == null) throw new NullPointerException("no post found");
             for(Post post:postList){
                 allList.add(new HashMap(getPostMap(post)));
             }
@@ -277,11 +272,6 @@ public class PostController {
             
             for demo*/
             response = getResonse(200, data);
-            return response;
-        }catch(NullPointerException e){
-            data.clear();
-            data.put("msg", "no post found");
-            response = getResonse(300, data);
             return response;
         }catch(Exception e){
             data.clear();
@@ -307,18 +297,13 @@ public class PostController {
             postList = searchService.getPostByLocation(location, Integer.parseInt(newRequest.get("limit").toString()), 
                                                         Integer.parseInt(newRequest.get("range").toString()));
             //end
-            if(postList == null) throw NullPointerException;
+            if(postList == null) throw new NullPointerException("no post found");
             for(Post post:postList){
                 allList.add(new HashMap(getPostMap(post)));
             }
             data.put("downloadCount", allList.size());
             data.put("postList", allList);
             response = getResonse(200, data);
-            return response;
-        }catch(NullPointerException e){
-            data.clear();
-            data.put("msg", "no post found");
-            response = getResonse(300, data);
             return response;
         }catch(Exception e){
             data.clear();
@@ -346,18 +331,13 @@ public class PostController {
             //need to discuss
             postList = searchService.searchPost(userid, keyword, comments);
             //end
-            if(postList == null) throw NullPointerException;
+            if(postList == null) throw new NullPointerException("no post found");
             for(Post post:postList){
                 allList.add(new HashMap(getPostMap(post)));
             }
             data.put("downloadCount", allList.size());
             data.put("postList", allList);
             response = getResonse(200, data);
-            return response;
-        }catch(NullPointerException e){
-            data.clear();
-            data.put("msg", "no post found");
-            response = getResonse(300, data);
             return response;
         }catch(Exception e){
             data.clear();
