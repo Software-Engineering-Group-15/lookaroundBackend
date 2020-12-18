@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lookaroundBackend.entity.Comment;
 import lookaroundBackend.entity.Post;
+import lookaroundBackend.entity.User;
 import lookaroundBackend.service.PublishService;
 import lookaroundBackend.service.SearchService;
 import lookaroundBackend.service.UserManageService;
@@ -60,7 +61,7 @@ public class PostController {
 
     //生成commentmap
     private Map<String,Object> getCommentMap(Comment comment){
-        Map<Stirng,Object> commentMap = new HashMap<String,Object>();
+        Map<String,Object> commentMap = new HashMap<String,Object>();
         commentMap.put("commentID", comment.getId());
         commentMap.put("publisher", comment.getPublisher().getUsername());
         commentMap.put("time", comment.getPublishTime().toString());
@@ -290,7 +291,7 @@ public class PostController {
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
         ArrayList<Post> postList = new ArrayList<Post>();
-        ArrayList<Map<String,Object>> allList = new ArrayList<String,Object>();
+        ArrayList<Map<String,Object>> allList = new ArrayList<Map<String,Object>>();
         try{
             Map<String,Object> locationMap = (Map<String,Object>)newRequest.get("location");
             //need to discuss
@@ -324,7 +325,7 @@ public class PostController {
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
         ArrayList<Post> postList = new ArrayList<Post>();
-        ArrayList<Map<String,Object>> allList = new ArrayList<String,Object>();
+        ArrayList<Map<String,Object>> allList = new ArrayList<Map<String,Object>>();
         try{
             if(userid == null) userid = -1;
             if(comments == null) comments = 10;
