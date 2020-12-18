@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lookaroundBackend.entity.Comment;
 import lookaroundBackend.entity.Post;
+import lookaroundBackend.entity.User;
 import lookaroundBackend.service.PublishService;
 import lookaroundBackend.service.SearchService;
+import lookaroundBackend.service.UserManageService;
 
 @RestController
 public class PostController {
@@ -27,12 +30,44 @@ public class PostController {
     @Autowired
     private PublishService publishService;
 
+    @Autowired
+    private UserManageService userService;
+
+	private Object put;
+
     //生成response
     private Map<String,Object> getResonse(Integer code, Map<String,Object> data){
         Map<String,Object> response = new HashMap<String,Object>();
         response.put("code", code);
         response.put("data", data);
         return response;
+    }
+
+    //生成postmap
+    private Map<String,Object> getPostMap(Post post){
+        Map<String,Object> postMap = new HashMap<String,Object>();
+        ArrayList<Map<String,Object>> commentlist = new ArrayList<Map<String,Object>>();
+        postMap.put("id", post.getId());
+        postMap.put("publisher", post.getPublisher().getUsername());
+        postMap.put("time", post.getPublishTime().toString());
+        postMap.put("location", post.getPublishLoction());
+        postMap.put("text", post.getTextContent());
+        Set<Comment> commentList = post.getCommentList();
+        for(Comment comment:commentList){
+            commentlist.add(new HashMap(getCommentMap(comment)));
+        }
+        postMap.put("commentList", commentlist);
+        return postMap;
+    }
+
+    //生成commentmap
+    private Map<String,Object> getCommentMap(Comment comment){
+        Map<String,Object> commentMap = new HashMap<String,Object>();
+        commentMap.put("commentID", comment.getId());
+        commentMap.put("publisher", comment.getPublisher().getUsername());
+        commentMap.put("time", comment.getPublishTime().toString());
+        commentMap.put("text", comment.getTextContent());
+        return commentMap;
     }
     
     // 按ID获取Post
@@ -41,20 +76,9 @@ public class PostController {
     public Map<String,Object> getPostById(@PathVariable(name = "post_id", required = true) Integer post_id) {
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>();
-        Map<String,Object> postMap = new HashMap<String,Object>(); 
-        Map<String,Object> commentMap = new HashMap<String,Object>();
-        ArrayList<Map<String,Object>> commentlist = new ArrayList<Map<String,Object>>();
         try{
             Post post = searchService.findPost(post_id);
-            postMap.put("id", post.getId());
-            postMap.put("publisher", post.getPublisher().getUsername());
-            //postMap.put("location", post.getPublishLoction());
-            postMap.put("location", post.getPublishLoction() == "Loc A" ? "39.988,116.310" : "40,116.21");//for demo
-            //postMap.put("text", post.getTextContent());
-            postMap.put("text", "Hello world");
-            //Set<Comment> commentList = post.getCommentList();
-            postMap.put("commentList", commentlist);
-            data.put("post", postMap);
+            data.put("post", new HashMap(getPostMap(post)));
             response = getResonse(200, data);
             return response;
         }catch(NoSuchElementException e){
@@ -81,13 +105,11 @@ public class PostController {
             Map<String,Object> locationMap = (Map<String,Object>)newRequest.get("location");
             Map<String,Object> publisherMap = (Map<String,Object>)newRequest.get("publisher");
 
-             //need to discuss
-            String location = locationMap.get("long").toString()+" "+locationMap.get("lat").toString();
-            //Post post = postService.createPost(publisherMap.get("userName"), newpost.get("text"), location, null);
+            String location = locationMap.get("long").toString()+","+locationMap.get("lat").toString();
+            User user = userService.findByUsername(publisherMap.get("userName").toString());
+            Post post = publishService.publishPost(user, newpost.get("text").toString(), location, new HashSet<Byte[]>());
             
-            publishService.publishPost(publisherMap.get("userName").toString(), newpost.get("text").toString(), location, null);
-            //end
-
+            data.put("post", new HashMap(getPostMap(post)));
             data.put("msg", "success");
             response = getResonse(200, data);
             return response;
@@ -108,7 +130,7 @@ public class PostController {
                                         @PathVariable(name = "start") Integer start){
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
-        ArrayList<Comment> commentList = new ArrayList<Comment>();
+        ArrayList<Map<String,Object>> commentList = new ArrayList<Map<String,Object>>();
         try{
             if(limit == null) limit = 10;
             if(start == null) start = 1;
@@ -117,15 +139,20 @@ public class PostController {
             Post post = searchService.findPost(post_id);
 
             // TODO: JPA要求用SET实现CommentList。所以limit的要求有些尴尬
-
-            commentList.addAll(post.getCommentList());
-            data.put("commentList", commentList);
+            if(post == null) throw new NullPointerException("no post found");
+            Set<Comment> commentlist = post.getCommentList();
+            if(commentlist == null) data.put("commentList", null);
+            else{
+                for(Comment comment:commentlist){
+                    commentList.add(new HashMap(getCommentMap(comment)));
+                }
+                data.put("commentList", commentList);
+            }
             //end
-
+            data.put("downloadCount", commentList.size());
             response = getResonse(200, data);
             return response;
-        }
-        catch(Exception e){
+        }catch(Exception e){
             data.clear();
             data.put("msg",e.getMessage());
             response = getResonse(300, data);
@@ -165,12 +192,9 @@ public class PostController {
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
         try{
-
-            /*  publishComment(String, Integer, String)
-            publishService.publishComment(newRequest.get("userName").toString(), 
-                                        Integer.parseInt(newRequest.get("postID").toString()), 
-                                        newRequest.get("text").toString());
-            */
+            User user = userService.findByUsername(newRequest.get("userName").toString());
+            Post post = searchService.findPost(Integer.parseInt(newRequest.get("postID").toString()));
+            publishService.publishComment(user, post, newRequest.get("text").toString());
             data.put("msg", "success");
             response = getResonse(200, data);
             return response;
@@ -215,11 +239,9 @@ public class PostController {
                                             @PathVariable(name = "start",required = false) Integer start,
                                             @PathVariable(name = "comments",required = false) Integer comments) {
         Map<String,Object> response = new HashMap<String,Object>();
-        Map<String,Object> data = new HashMap<String,Object>(); 
+        Map<String,Object> data = new HashMap<String,Object>();
         ArrayList<Post> postList = new ArrayList<Post>();
-        //for demo
         ArrayList<Map<String,Object>> allList= new ArrayList<Map<String,Object>>(); 
-        //
         try{
             if(limit == null) limit = 10;
             if(start == null) start = 1;
@@ -228,11 +250,13 @@ public class PostController {
              //need to discuss
             postList = searchService.getPostByTime(limit,start,comments);
             //end
-            /*
-            data.put("downloadCount", postList == null ? 0 : postList.size());
-            data.put("posts", postList);
-            */
-            //for demo
+            if(postList == null) throw new NullPointerException("no post found");
+            for(Post post:postList){
+                allList.add(new HashMap(getPostMap(post)));
+            }
+            data.put("downloadCount", allList.size());
+            data.put("posts", allList);
+            /*for demo
             Map<String,Object> post = new HashMap<String,Object>();
             post.put("id", 3);
             post.put("text", "Hello world");
@@ -243,9 +267,8 @@ public class PostController {
             post.put("text", "Hello world");
             post.put("location","40,116.21");
             allList.add(new HashMap(post));
-            data.put("downloadCount",allList.size());
-            data.put("posts",allList);
-            //for demo
+            
+            for demo*/
             response = getResonse(200, data);
             return response;
         }catch(Exception e){
@@ -264,20 +287,23 @@ public class PostController {
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
         ArrayList<Post> postList = new ArrayList<Post>();
+        ArrayList<Map<String,Object>> allList = new ArrayList<Map<String,Object>>();
         try{
             Map<String,Object> locationMap = (Map<String,Object>)newRequest.get("location");
             //need to discuss
-            String location = locationMap.get("long").toString()+" "+locationMap.get("lat").toString();
+            String location = locationMap.get("long").toString()+","+locationMap.get("lat").toString();
             postList = searchService.getPostByLocation(location, Integer.parseInt(newRequest.get("limit").toString()), 
                                                         Integer.parseInt(newRequest.get("range").toString()));
             //end
-
-            data.put("downloadCount", postList == null ? 0: postList.size());
-            data.put("postList", postList);
+            if(postList == null) throw new NullPointerException("no post found");
+            for(Post post:postList){
+                allList.add(new HashMap(getPostMap(post)));
+            }
+            data.put("downloadCount", allList.size());
+            data.put("postList", allList);
             response = getResonse(200, data);
             return response;
-        }
-        catch(Exception e){
+        }catch(Exception e){
             data.clear();
             data.put("msg",e.getMessage());
             response = getResonse(300, data);
@@ -295,6 +321,7 @@ public class PostController {
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
         ArrayList<Post> postList = new ArrayList<Post>();
+        ArrayList<Map<String,Object>> allList = new ArrayList<Map<String,Object>>();
         try{
             if(userid == null) userid = -1;
             if(comments == null) comments = 10;
@@ -302,9 +329,44 @@ public class PostController {
             //need to discuss
             postList = searchService.searchPost(userid, keyword, comments);
             //end
+            if(postList == null) throw new NullPointerException("no post found");
+            for(Post post:postList){
+                allList.add(new HashMap(getPostMap(post)));
+            }
+            data.put("downloadCount", allList.size());
+            data.put("postList", allList);
+            response = getResonse(200, data);
+            return response;
+        }catch(Exception e){
+            data.clear();
+            data.put("msg", e.getMessage());
+            response = getResonse(300, data);
+            return response;
+        }
 
-            data.put("downloadCount", postList == null ? 0 : postList.size());
-            data.put("posts", postList);
+    }
+
+    //TODO:新增根据用户查找动态的接口，需要search service提供一下实现
+    //查看动态（按照用户）
+    @RequestMapping(value = "/posts/user/{username}", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String,Object> getPostByUser(@PathVariable(name = "username",required = true) String userName) {
+        Map<String,Object> response = new HashMap<String,Object>();
+        Map<String,Object> data = new HashMap<String,Object>();
+        ArrayList<Post> postList = new ArrayList<Post>();
+        ArrayList<Map<String,Object>> allList= new ArrayList<Map<String,Object>>(); 
+        try{
+            User user = userService.findByUsername(userName);
+             //需要实现
+            //postList = searchService.getPostByUser(user);
+            
+            if(postList == null) throw new NullPointerException("no post found");
+            for(Post post:postList){
+                allList.add(new HashMap(getPostMap(post)));
+            }
+            data.put("downloadCount", allList.size());
+            data.put("posts", allList);
+
             response = getResonse(200, data);
             return response;
         }catch(Exception e){
