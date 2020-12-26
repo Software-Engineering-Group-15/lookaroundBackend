@@ -41,7 +41,6 @@ public class JsonLoginFilter extends AbstractAuthenticationProcessingFilter{
             String password = user.getPassword();
             password = (password != null) ? password : "";
 
-            // 交给数据库处理
             UsernamePasswordAuthenticationToken authRequest = 
                 new UsernamePasswordAuthenticationToken(username, password);
 

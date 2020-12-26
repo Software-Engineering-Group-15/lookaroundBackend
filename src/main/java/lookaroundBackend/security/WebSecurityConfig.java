@@ -1,5 +1,7 @@
 package lookaroundBackend.security;
 
+import java.util.Arrays;
+
 import javax.servlet.Filter;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import lookaroundBackend.security.fliter.JsonLoginFilter;
 import lookaroundBackend.security.fliter.JwtAuthenticationFilter;
@@ -69,8 +74,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         /**
          * 注册自定义的认证管理：使用userManageService从数据库中得到用户信息，然后用于验证
          */
-        // auth.userDetailsService(userManageService).passwordEncoder(passwordEncoder());
+        auth.userDetailsService(userManageService)
+        .passwordEncoder(passwordEncoder());
     }
+
+    /**
+     * 配置跨域访问
+     */
+    @Bean 
+    public CorsConfigurationSource corsConfigurationSource(){
+        final CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH"));
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    } 
 
     @Bean
     public JsonLoginFilter jsonLoginFilter() throws Exception {
