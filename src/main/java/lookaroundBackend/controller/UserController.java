@@ -36,33 +36,6 @@ public class UserController {
     @ResponseBody
     public Map<String,Object> login(@RequestBody Map<String,Object> newRequest) {
 
-        /*
-        Map<String,Object> response = new HashMap<String,Object>();
-        Map<String,Object> data = new HashMap<String,Object>(); 
-        Map<String,Object> profile = new HashMap<String,Object>();
-        try{
-            String username = (String)newRequest.get("userName");
-            String password = (String)newRequest.get("password");
-
-             //need to discuss
-            //User user = userService.login(username, password);
-            //end
-            User user = new User();
-
-            profile.put("userName", username);
-            profile.put("userID", user.getId());
-            data.put("msg", "success");
-            data.put("profile", profile);
-            response = getResonse(200, data);
-        }catch(Exception e){
-            data.clear();
-            data.put("msg", e.getMessage());
-            response = getResonse(300, data);
-        }
-        finally{
-            return response;
-        }
-        */
         return getResonse(300, new HashMap<String,Object>());
     }
 

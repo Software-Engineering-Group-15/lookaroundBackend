@@ -22,6 +22,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import lookaroundBackend.security.fliter.JsonLoginFilter;
+import lookaroundBackend.security.fliter.JsonRegisterFilter;
 import lookaroundBackend.security.fliter.JwtAuthenticationFilter;
 import lookaroundBackend.security.fliter.handle.JsonLoginFailureHandler;
 import lookaroundBackend.security.fliter.handle.JsonLoginSuccessHandler;
@@ -38,7 +39,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     
     /**
      * 访问限制
-     * 
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -48,7 +48,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .authorizeRequests()
             //.antMatchers(HttpMethod.POST, "/user/register").permitAll()
             //.antMatchers("/user").hasRole(EnumGrantedAuthority.USER.getRole())
-            .antMatchers(HttpMethod.GET, "/hello").hasRole("ADMIN")
+            .antMatchers(HttpMethod.GET, "/hello").hasRole("USER")
             .anyRequest().permitAll()
             .and()
         .addFilterAt(jsonLoginFilter(), UsernamePasswordAuthenticationFilter.class)
@@ -97,10 +97,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public JsonLoginFilter jsonLoginFilter() throws Exception {
         JsonLoginFilter filter = new JsonLoginFilter(authenticationManager());
 
-        // 登录成功: 生成token并返回给前端，保存在后端
+        // 登录成功: 生成token并返回给前端
         filter.setAuthenticationSuccessHandler(new JsonLoginSuccessHandler());
 
         // 登录失败：回复一个401的Response
+        filter.setAuthenticationFailureHandler(new JsonLoginFailureHandler());
+
+        //不将认证后的context放入session
+        filter.setSessionAuthenticationStrategy(new NullAuthenticatedSessionStrategy());
+        return filter;
+    }
+
+    @Bean 
+    public JsonRegisterFilter jsonRegisterFilter() throws Exception{
+        JsonRegisterFilter filter = new JsonRegisterFilter(authenticationManager());
+
+        // 注册成功: 登录成功的处理
+        filter.setAuthenticationSuccessHandler(new JsonLoginSuccessHandler());
+
+        // 登录失败：登录失败的处理
         filter.setAuthenticationFailureHandler(new JsonLoginFailureHandler());
 
         //不将认证后的context放入session

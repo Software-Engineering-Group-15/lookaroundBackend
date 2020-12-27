@@ -17,5 +17,4 @@ public class JsonLoginFailureHandler implements AuthenticationFailureHandler {
             AuthenticationException exception) throws IOException, ServletException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
     }
-
 }

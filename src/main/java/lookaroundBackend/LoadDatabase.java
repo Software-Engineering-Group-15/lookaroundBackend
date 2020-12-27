@@ -16,6 +16,8 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import lookaroundBackend.service.PublishService;
 import lookaroundBackend.service.UserManageService;
@@ -30,12 +32,14 @@ public class LoadDatabase {
   private PublishService publishService; 
   @Autowired
   private UserManageService userManageService;
+
+  private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     
     @Bean
     CommandLineRunner initDatabase() {
       return args -> {
-          var user1 = userManageService.registerAsUser("Alice","password");
-          var user2 = userManageService.registerAsUser("Bob","password");
+          var user1 = userManageService.registerAsUser("Alice",passwordEncoder.encode("password"));
+          var user2 = userManageService.registerAsUser("Bob",passwordEncoder.encode("password"));
 
           // Byte[] f1 = new Byte[] {Byte.valueOf("1"), Byte.valueOf("2")};
           // Byte[] f2 = new Byte[] {Byte.valueOf("3"), Byte.valueOf("4")};

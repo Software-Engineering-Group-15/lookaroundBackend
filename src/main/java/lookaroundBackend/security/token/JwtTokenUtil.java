@@ -7,6 +7,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -18,8 +20,9 @@ import lookaroundBackend.utils.EnumGrantedAuthority;
 
 public class JwtTokenUtil {
 
+    private static final Logger log = LoggerFactory.getLogger(JwtTokenUtil.class);
     private static final SignatureAlgorithm ALGORITHM = SignatureAlgorithm.HS256;
-    private static final long TOKEN_EXPIRED_TIME = 24 * 60 * 60;
+    private static final long TOKEN_EXPIRED_TIME = 24 * 60 * 60 * 1000;
     private static String SECRET_KEY = String.format("Lanius42");
 
     public static String createJwtToken(Authentication authResult) {
@@ -50,16 +53,15 @@ public class JwtTokenUtil {
      * @param request
      * @return JwtToken字符串
      */
-    private static String getJwtToken(HttpServletRequest request) {
-        String header = request.getHeader("Authentication");
+    public static String getJwtToken(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
         if (header == null)
             return null;
         return header.replace("Bearer ", "");
     }
 
 
-    public static JwtAuthenticationToken getJwtAuthenticationToken(HttpServletRequest request){
-        String jwtTokenString = getJwtToken(request);
+    public static JwtAuthenticationToken getJwtAuthenticationToken(String jwtTokenString){
         return new JwtAuthenticationToken(null, jwtTokenString);
     }
 
@@ -73,21 +75,25 @@ public class JwtTokenUtil {
 
     public static JwtAuthenticationToken parseJwtToken(JwtAuthenticationToken authToken) throws UnsupportedJwtException {
 
+
         String token = authToken.getJwtTokenString();
         String username = null;
-        List<String> roles = List.of();
+        List<String> roles = null;
         try {
-            Claims body = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+            Claims body = Jwts
+                .parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+            
             username = body.get("username", String.class);
             roles = body.get("roles", List.class);
+            // System.out.println("username: " + username + " roles :" + roles);
             
-        } catch (UnsupportedJwtException e) {
-            throw new UnsupportedJwtException(e.toString() + " 校验的JwtToken有问题: " + token);
+        } catch (Exception e) {
+
+            // throw new UnsupportedJwtException(e.toString() + " 校验的JwtToken有问题: " + token);
         }
-        if (username != null) {
-            return new JwtAuthenticationToken(username, token, EnumGrantedAuthority.rolesToAuthorities(roles));
-        }
-        return null;
+        if(username == null) return null;
+
+        return new JwtAuthenticationToken(username, token, EnumGrantedAuthority.rolesToAuthorities(roles));
     }
 
 }

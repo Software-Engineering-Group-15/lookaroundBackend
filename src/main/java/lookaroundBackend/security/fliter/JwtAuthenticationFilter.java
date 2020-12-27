@@ -20,7 +20,8 @@ import lookaroundBackend.security.token.JwtTokenUtil;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
-    private RequestHeaderRequestMatcher requiresAuthenticationRequestMatcher = new RequestHeaderRequestMatcher("Authorization");
+    private RequestHeaderRequestMatcher requiresAuthenticationRequestMatcher 
+        = new RequestHeaderRequestMatcher("Authorization");
 
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
@@ -38,6 +39,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         HttpServletResponse response) {
         return requiresAuthenticationRequestMatcher.matches(request);
     }
+    
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -48,19 +50,20 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             return;
         }
 
-        AuthenticationException failed = null;
-        Authentication authRequest = JwtTokenUtil.getJwtAuthenticationToken(request);
-        Authentication authResult = this.getAuthenticationManager().authenticate(authRequest);
+        String jwtTokenString = JwtTokenUtil.getJwtToken(request);
 
-        if (authResult != null) { // token认证成功
-            SecurityContextHolder.getContext().setAuthentication(authResult);
-            onSuccessfulAuthentication(request, response, authResult);
-        } else {
-            onUnsuccessfulAuthentication(request, response, failed);
+        if (jwtTokenString == null){
+            chain.doFilter(request, response);
             return;
         }
+
+        //AuthenticationException failed = null;
+        Authentication authRequest = JwtTokenUtil.getJwtAuthenticationToken(jwtTokenString);
+        Authentication authResult = this.getAuthenticationManager().authenticate(authRequest);
+
+        SecurityContextHolder.getContext().setAuthentication(authResult);
+        onSuccessfulAuthentication(request, response, authResult);
         chain.doFilter(request, response);
     }
 
-    
 }

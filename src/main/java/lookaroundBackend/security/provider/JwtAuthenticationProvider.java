@@ -16,10 +16,11 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     Authentication authenResult = null;
     try{
       authenResult = JwtTokenUtil.parseJwtToken((JwtAuthenticationToken) authentication);
+      System.out.println(authenResult.toString());
     }
     catch(Exception e){
       // TODO: 定义一个新的异常
-      throw new UsernameNotFoundException(e.toString() + " : JWT Authentication Fail");
+      throw new UsernameNotFoundException(e.toString() + " authenResult:" + authenResult);
     }
     return authenResult;
   }

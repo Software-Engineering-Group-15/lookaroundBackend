@@ -1,5 +1,6 @@
 package lookaroundBackend.utils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,16 +31,20 @@ public enum EnumGrantedAuthority implements GrantedAuthority{
     }
 
     public static Collection<GrantedAuthority> rolesToAuthorities(Collection<String> roles){
-        List<GrantedAuthority> authorities = List.of();
+        List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
         for(String role: roles){
-            if(role.equals(USER.getAuthority())){
+            if(role.equals(USER.getRole())){
                 authorities.add(EnumGrantedAuthority.USER);
             }
-            if(role.equals(ADMIN.getAuthority())){
+            if(role.equals(ADMIN.getRole())){
                 authorities.add(EnumGrantedAuthority.ADMIN);
             }
         }        
         return authorities;
     }
 
+    @Override
+    public String toString() {
+        return this.role;
+    }
 }

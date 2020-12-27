@@ -35,12 +35,30 @@ public class UserManageService implements UserDetailsService {
         return user;    
     } 
 
+
+    /**
+     * 注册。若用户已存在，返回null；否则注册并返回用户
+     * @param username
+     * @param password
+     * @return
+     */
     public User registerAsUser(String username, String password){
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        authorities.add(EnumGrantedAuthority.USER);
-        User newUser = new User(username, password, authorities);
-        userRepository.save(newUser);
-        return newUser;
+        User user = null;
+        try{
+            user = this.findByUsername(username);
+        }
+        catch (UsernameNotFoundException e){
+        }
+        if (user == null){
+            Set<GrantedAuthority> authorities = new HashSet<>();
+            authorities.add(EnumGrantedAuthority.USER);
+            user = new User(username, password, authorities);
+            userRepository.save(user);
+            return user;
+        }
+        else{
+            return null;
+        }
     }
 
     @Override
