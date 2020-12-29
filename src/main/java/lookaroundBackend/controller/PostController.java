@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import lookaroundBackend.entity.Comment;
 import lookaroundBackend.entity.Post;
@@ -101,12 +102,14 @@ public class PostController {
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
         try{
+            String username = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+            User user = userService.findByUsername(username);
+
             Map<String,Object> newpost = (Map<String,Object>)newRequest.get("post");
             Map<String,Object> locationMap = (Map<String,Object>)newRequest.get("location");
             Map<String,Object> publisherMap = (Map<String,Object>)newRequest.get("publisher");
 
             String location = locationMap.get("long").toString()+","+locationMap.get("lat").toString();
-            User user = userService.findByUsername(publisherMap.get("userName").toString());
             Post post = publishService.publishPost(user, newpost.get("text").toString(), location, new HashSet<Byte[]>());
             
             data.put("post", new HashMap(getPostMap(post)));
@@ -138,7 +141,6 @@ public class PostController {
             //need to discuss
             Post post = searchService.findPost(post_id);
 
-            // TODO: JPA要求用SET实现CommentList。所以limit的要求有些尴尬
             if(post == null) throw new NullPointerException("no post found");
             Set<Comment> commentlist = post.getCommentList();
             if(commentlist == null) data.put("commentList", null);
@@ -192,7 +194,9 @@ public class PostController {
         Map<String,Object> response = new HashMap<String,Object>();
         Map<String,Object> data = new HashMap<String,Object>(); 
         try{
-            User user = userService.findByUsername(newRequest.get("userName").toString());
+            String username = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+            User user = userService.findByUsername(username);
+
             Post post = searchService.findPost(Integer.parseInt(newRequest.get("postID").toString()));
             publishService.publishComment(user, post, newRequest.get("text").toString());
             data.put("msg", "success");
@@ -247,28 +251,15 @@ public class PostController {
             if(start == null) start = 1;
             if(comments == null) comments = 10;
 
-             //need to discuss
             postList = searchService.getPostByTime(limit,start,comments);
-            //end
+            
             if(postList == null) throw new NullPointerException("no post found");
             for(Post post:postList){
                 allList.add(new HashMap(getPostMap(post)));
             }
             data.put("downloadCount", allList.size());
             data.put("posts", allList);
-            /*for demo
-            Map<String,Object> post = new HashMap<String,Object>();
-            post.put("id", 3);
-            post.put("text", "Hello world");
-            post.put("location","39.988,116.310");
-            allList.add(new HashMap(post));
-            post.clear();
-            post.put("id", 4);
-            post.put("text", "Hello world");
-            post.put("location","40,116.21");
-            allList.add(new HashMap(post));
-            
-            for demo*/
+
             response = getResonse(200, data);
             return response;
         }catch(Exception e){
@@ -290,11 +281,11 @@ public class PostController {
         ArrayList<Map<String,Object>> allList = new ArrayList<Map<String,Object>>();
         try{
             Map<String,Object> locationMap = (Map<String,Object>)newRequest.get("location");
-            //need to discuss
+            
             String location = locationMap.get("long").toString()+","+locationMap.get("lat").toString();
             postList = searchService.getPostByLocation(location, Integer.parseInt(newRequest.get("limit").toString()), 
                                                         Integer.parseInt(newRequest.get("range").toString()));
-            //end
+            
             if(postList == null) throw new NullPointerException("no post found");
             for(Post post:postList){
                 allList.add(new HashMap(getPostMap(post)));
