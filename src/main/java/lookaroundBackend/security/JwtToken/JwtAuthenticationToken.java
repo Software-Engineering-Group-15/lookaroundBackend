@@ -1,4 +1,4 @@
-package lookaroundBackend.security.token;
+package lookaroundBackend.security.JwtToken;
 
 import java.util.Collection;
 

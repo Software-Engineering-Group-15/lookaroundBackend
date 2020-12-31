@@ -38,6 +38,9 @@ public class LoadDatabase {
     @Bean
     CommandLineRunner initDatabase() {
       return args -> {
+
+          var admin = userManageService.registerAsAdmin("ADMIN", passwordEncoder.encode("password"));
+
           var user1 = userManageService.registerAsUser("Alice",passwordEncoder.encode("password"));
           var user2 = userManageService.registerAsUser("Bob",passwordEncoder.encode("password"));
 

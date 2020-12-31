@@ -5,29 +5,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import lookaroundBackend.security.token.JwtAuthenticationToken;
-import lookaroundBackend.security.token.JwtTokenUtil;
-
+import lookaroundBackend.security.JwtToken.JwtAuthenticationToken;
+import lookaroundBackend.security.JwtToken.JwtTokenUtil;
 
 public class JwtAuthenticationProvider implements AuthenticationProvider {
 
-  @Override
-  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-    Authentication authenResult = null;
-    try{
-      authenResult = JwtTokenUtil.parseJwtToken((JwtAuthenticationToken) authentication);
-      // System.out.println(authenResult.toString());
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        return JwtTokenUtil.parseJwtToken((JwtAuthenticationToken) authentication);
     }
-    catch(Exception e){
-      // TODO: 定义一个新的异常
-      throw new UsernameNotFoundException(e.toString() + " authenResult:" + authenResult);
-    }
-    return authenResult;
-  }
 
-  @Override
-  public boolean supports(Class<?> authentication) {
-    return JwtAuthenticationToken.class.isAssignableFrom(authentication);
-  }
+    @Override
+    public boolean supports(Class<?> authentication) {
+        return JwtAuthenticationToken.class.isAssignableFrom(authentication);
+    }
 
 }

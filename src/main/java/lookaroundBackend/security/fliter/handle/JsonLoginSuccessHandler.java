@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.ForwardAuthenticationSuccessHandler;
 
-import lookaroundBackend.security.token.JwtTokenUtil;
+import lookaroundBackend.security.JwtToken.JwtTokenUtil;
 
 public class JsonLoginSuccessHandler extends ForwardAuthenticationSuccessHandler {
 

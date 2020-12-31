@@ -61,6 +61,26 @@ public class UserManageService implements UserDetailsService {
         }
     }
 
+    public User registerAsAdmin(String username, String password){
+        User user = null;
+        try{
+            user = this.findByUsername(username);
+        }
+        catch (UsernameNotFoundException e){
+        }
+        if (user == null){
+            Set<GrantedAuthority> authorities = new HashSet<>();
+            authorities.add(EnumGrantedAuthority.USER);
+            authorities.add(EnumGrantedAuthority.ADMIN);
+            user = new User(username, password, authorities);
+            userRepository.save(user);
+            return user;
+        }
+        else{
+            return null;
+        }
+    }
+    
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return (UserDetails) findByUsername(username);

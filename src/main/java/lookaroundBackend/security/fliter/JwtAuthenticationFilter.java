@@ -7,22 +7,22 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.core.log.LogMessage;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
 
-import lookaroundBackend.security.token.JwtTokenUtil;
+import lookaroundBackend.security.JwtToken.JwtTokenUtil;
 
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
-
-    private RequestHeaderRequestMatcher requiresAuthenticationRequestMatcher 
-        = new RequestHeaderRequestMatcher("Authorization");
-
-
+    
+    
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
     }
@@ -33,36 +33,60 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     }
 
-
-    protected boolean requiresAuthentication(HttpServletRequest request,
-        HttpServletResponse response) {
-        return requiresAuthenticationRequestMatcher.matches(request);
-    }
-    
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+        try{
+            // Header中没有验证或验证类型不是Jwt的，放给后面的Filter处理
+            String jwtTokenString = JwtTokenUtil.getJwtToken(request);
+            if (jwtTokenString == null){
+                this.logger.trace("Did not process authentication request since failed to find "
+                + "JWT in Bearer Authorization header");
+                chain.doFilter(request, response);
+                return;
+            }
 
-        // Header中没有验证或验证类型不是Jwt的，放给后面的Filter处理
-        if (!requiresAuthentication(request, response)) {
+            Authentication authRequest = JwtTokenUtil.getJwtAuthenticationToken(jwtTokenString);
+            
+            Authentication authResult = this.getAuthenticationManager().authenticate(authRequest);
+            SecurityContextHolder.getContext().setAuthentication(authResult);
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug(LogMessage.format("Set SecurityContextHolder to %s", authResult));
+            }
+
+            onSuccessfulAuthentication(request, response, authResult);
             chain.doFilter(request, response);
-            return;
         }
+		catch (AuthenticationException ex) {
+            SecurityContextHolder.clearContext();
+            
+            this.logger.trace("Failed to process authentication request", ex);
+            
+			onUnsuccessfulAuthentication(request, response, ex);
 
-        String jwtTokenString = JwtTokenUtil.getJwtToken(request);
-
-        if (jwtTokenString == null){
-            chain.doFilter(request, response);
-            return;
-        }
-
-        //AuthenticationException failed = null;
-        Authentication authRequest = JwtTokenUtil.getJwtAuthenticationToken(jwtTokenString);
-        Authentication authResult = this.getAuthenticationManager().authenticate(authRequest);
-
-        SecurityContextHolder.getContext().setAuthentication(authResult);
-        onSuccessfulAuthentication(request, response, authResult);
+			return;
+		}
         chain.doFilter(request, response);
     }
 
+    @Override
+    protected void onSuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+            Authentication authResult) throws IOException {
+        super.onSuccessfulAuthentication(request, response, authResult);
+    }
+
+    @Override
+    protected void onUnsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+            AuthenticationException failed) throws IOException {
+        
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        request.setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, failed);
+        try {
+            request.getRequestDispatcher("/error").forward(request, response);
+        } catch (ServletException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 }

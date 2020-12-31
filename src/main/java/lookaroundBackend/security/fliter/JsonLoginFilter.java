@@ -31,7 +31,7 @@ public class JsonLoginFilter extends AbstractAuthenticationProcessingFilter {
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException, IOException {
 
-        // content的类型不是JSON，验证失败
+        // content的类型不是JSON，交给别的filter
         if (request.getContentType() == null || !request.getContentType().equals(MediaType.APPLICATION_JSON_VALUE)) {
             throw new AuthenticationFormatException("Authentication method not supported: Must be JSON");
         }
