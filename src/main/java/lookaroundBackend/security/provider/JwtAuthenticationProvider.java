@@ -16,7 +16,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     Authentication authenResult = null;
     try{
       authenResult = JwtTokenUtil.parseJwtToken((JwtAuthenticationToken) authentication);
-      System.out.println(authenResult.toString());
+      // System.out.println(authenResult.toString());
     }
     catch(Exception e){
       // TODO: 定义一个新的异常

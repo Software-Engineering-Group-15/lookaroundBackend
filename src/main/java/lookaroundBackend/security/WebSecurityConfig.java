@@ -52,6 +52,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .anyRequest().permitAll()
             .and()
         .addFilterAt(jsonLoginFilter(), UsernamePasswordAuthenticationFilter.class)
+        .addFilterAt(jsonRegisterFilter(), UsernamePasswordAuthenticationFilter.class)
         .addFilterAt(jwtAuthenticationFilter(),BasicAuthenticationFilter.class)
         .httpBasic();
     }
