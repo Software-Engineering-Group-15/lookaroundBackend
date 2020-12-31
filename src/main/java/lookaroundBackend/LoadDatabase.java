@@ -49,12 +49,12 @@ public class LoadDatabase {
           Set<Byte[]> s2 = new HashSet<>(); 
           // s2.add(f2); s2.add(f3);
 
-          var p1 = publishService.publishPost(user1, "Alice' post", "Loc A", s1);
-          var p2 = publishService.publishPost(user2, "Bob' post", "Loc B", s2);
-          var c1 = publishService.publishComment(user1, p1, "Alice' Comment");
-          var c2 = publishService.publishComment(user2, p2, "Bob' Comment");
-          var c3 = publishService.publishComment(user1, p2, "Alice' Comment");
-          var c4 = publishService.publishComment(user2, p1, "Bob' Comment");
+          var p1 = publishService.publishPost(user1, "Alice's post", "116.298,39.983", s1);
+          var p2 = publishService.publishPost(user2, "Bob's post", "116.311,40.001", s2);
+          var c1 = publishService.publishComment(user1, p1, "Alice's Comment");
+          var c2 = publishService.publishComment(user2, p2, "Bob's Comment");
+          var c3 = publishService.publishComment(user1, p2, "Alice's Comment");
+          var c4 = publishService.publishComment(user2, p1, "Bob's Comment");
 
           log.info("User1: " + user1);
           log.info("User2: " + user2);
