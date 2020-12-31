@@ -12,18 +12,41 @@ import lookaroundBackend.JsonBean.MessageBean;
 @RestController
 public class LoginController {
 
+    // @RequestMapping(value = "/user/login/**", method = RequestMethod.POST)
+    // public String loginFoward(){
+    //     return "forward:/login";
+    // } 
+
+
     @RequestMapping(value = "/login/success", method = RequestMethod.POST)
-    public Object LoginSuccess(){
+    public Object loginSuccess(){
         return new MessageBean(HttpStatus.OK.value(),"Login Success");
     }
 
     @RequestMapping(value = "/login/error/badCredentials", method = RequestMethod.POST)
-    public Object LoginFail(@RequestAttribute("SPRING_SECURITY_LAST_EXCEPTION") AuthenticationException e){
-        return new MessageBean(HttpStatus.UNAUTHORIZED.value(), "用户名或密码错误: " + e.toString());
+    public Object loginFail(@RequestAttribute("SPRING_SECURITY_LAST_EXCEPTION") AuthenticationException e){
+        return new MessageBean(HttpStatus.UNAUTHORIZED.value(), "Wrong username or password: " + e.toString());
     }
 
     @RequestMapping(value = "/login/error/formatError", method = RequestMethod.POST)
-    public Object LoginFail2(@RequestAttribute("SPRING_SECURITY_LAST_EXCEPTION") AuthenticationException e){
+    public Object loginFail2(@RequestAttribute("SPRING_SECURITY_LAST_EXCEPTION") AuthenticationException e){
         return new MessageBean(HttpStatus.UNAUTHORIZED.value(), e.toString());
     }
+
+    @RequestMapping(value = "/register/success", method = RequestMethod.POST)
+    public Object registerSuccess(){
+        return new MessageBean(HttpStatus.UNAUTHORIZED.value(), "Register Success");
+    }
+
+
+    @RequestMapping(value = "/register/error/formatError", method = RequestMethod.POST)
+    public Object registerFail1(@RequestAttribute("SPRING_SECURITY_LAST_EXCEPTION") AuthenticationException e){
+        return new MessageBean(HttpStatus.UNAUTHORIZED.value(), e.toString());
+    }
+
+    @RequestMapping(value = "/register/error/usernameRegistered", method = RequestMethod.POST)
+    public Object registerFail2(@RequestAttribute("SPRING_SECURITY_LAST_EXCEPTION") AuthenticationException e){
+        return new MessageBean(HttpStatus.UNAUTHORIZED.value(), e.toString() );
+    }
+
 }

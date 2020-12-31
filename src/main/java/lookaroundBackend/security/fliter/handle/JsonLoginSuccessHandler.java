@@ -19,6 +19,10 @@ public class JsonLoginSuccessHandler extends ForwardAuthenticationSuccessHandler
         super(forwardUrl);
     }
 
+    public JsonLoginSuccessHandler(String forwardUrl) {
+        super(forwardUrl);
+    }
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {

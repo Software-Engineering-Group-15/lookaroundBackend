@@ -26,6 +26,8 @@ import lookaroundBackend.security.fliter.JsonRegisterFilter;
 import lookaroundBackend.security.fliter.JwtAuthenticationFilter;
 import lookaroundBackend.security.fliter.handle.JsonLoginFailureHandler;
 import lookaroundBackend.security.fliter.handle.JsonLoginSuccessHandler;
+import lookaroundBackend.security.fliter.handle.JsonRegisterFailureHandler;
+import lookaroundBackend.security.fliter.handle.JsonRegisterSuccessHandler;
 import lookaroundBackend.security.provider.JwtAuthenticationProvider;
 import lookaroundBackend.service.UserManageService;
 import lookaroundBackend.utils.EnumGrantedAuthority;
@@ -114,10 +116,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         JsonRegisterFilter filter = new JsonRegisterFilter(authenticationManager());
 
         // 注册成功: 登录成功的处理
-        filter.setAuthenticationSuccessHandler(new JsonLoginSuccessHandler());
+        filter.setAuthenticationSuccessHandler(new JsonRegisterSuccessHandler());
 
         // 登录失败：登录失败的处理
-        filter.setAuthenticationFailureHandler(new JsonLoginFailureHandler());
+        filter.setAuthenticationFailureHandler(new JsonRegisterFailureHandler());
 
         //不将认证后的context放入session
         filter.setSessionAuthenticationStrategy(new NullAuthenticatedSessionStrategy());

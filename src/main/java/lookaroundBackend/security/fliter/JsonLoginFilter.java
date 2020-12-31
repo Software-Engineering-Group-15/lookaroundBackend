@@ -21,7 +21,7 @@ import lookaroundBackend.security.fliter.exception.AuthenticationFormatException
 public class JsonLoginFilter extends AbstractAuthenticationProcessingFilter {
 
     public JsonLoginFilter(AuthenticationManager authenticationManager) {
-        super(new AntPathRequestMatcher("/login", "POST"), authenticationManager);
+        super(new AntPathRequestMatcher("/**/login", "POST"), authenticationManager);
     }
 
     /**
