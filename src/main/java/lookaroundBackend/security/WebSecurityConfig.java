@@ -7,14 +7,12 @@ import javax.servlet.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -29,7 +27,6 @@ import lookaroundBackend.security.fliter.handle.JsonLoginFailureHandler;
 import lookaroundBackend.security.fliter.handle.JsonLoginSuccessHandler;
 import lookaroundBackend.security.fliter.handle.JsonRegisterFailureHandler;
 import lookaroundBackend.security.fliter.handle.JsonRegisterSuccessHandler;
-import lookaroundBackend.security.fliter.handle.JwtAccessDeniedHandler;
 import lookaroundBackend.security.provider.JwtAuthenticationProvider;
 import lookaroundBackend.service.UserManageService;
 import lookaroundBackend.utils.EnumGrantedAuthority;
@@ -56,17 +53,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().hasRole(EnumGrantedAuthority.USER.getRole())
             .and()
                 .exceptionHandling()
-                .accessDeniedHandler(accessDeniedHandler())
-                // .accessDeniedPage("/error")
+                .accessDeniedPage("/error/accessDenied")
             .and()
                 .addFilterAt(jsonLoginFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(jsonRegisterFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(jwtAuthenticationFilter(), BasicAuthenticationFilter.class).httpBasic();
     }
 
-    private AccessDeniedHandler accessDeniedHandler() {
-        return new JwtAccessDeniedHandler();
-    }
 
     /**
      * 认证管理

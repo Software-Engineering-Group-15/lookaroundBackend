@@ -83,7 +83,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         request.setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, failed);
         try {
-            request.getRequestDispatcher("/error").forward(request, response);
+            request.getRequestDispatcher("/error/authenticationFail").forward(request, response);
         } catch (ServletException e) {
             this.logger.info(e);
             // e.printStackTrace();

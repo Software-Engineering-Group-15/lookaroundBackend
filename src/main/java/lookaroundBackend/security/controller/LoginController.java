@@ -35,7 +35,7 @@ public class LoginController {
 
     @RequestMapping(value = "/register/success", method = RequestMethod.POST)
     public Object registerSuccess(){
-        return new MessageBean(HttpStatus.UNAUTHORIZED.value(), "Register Success");
+        return new MessageBean(HttpStatus.OK.value(), "Register Success");
     }
 
 
