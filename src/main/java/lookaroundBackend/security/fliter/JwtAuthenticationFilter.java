@@ -85,8 +85,8 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         try {
             request.getRequestDispatcher("/error").forward(request, response);
         } catch (ServletException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            this.logger.info(e);
+            // e.printStackTrace();
         }
     }
 }

@@ -29,6 +29,7 @@ import lookaroundBackend.security.fliter.handle.JsonLoginFailureHandler;
 import lookaroundBackend.security.fliter.handle.JsonLoginSuccessHandler;
 import lookaroundBackend.security.fliter.handle.JsonRegisterFailureHandler;
 import lookaroundBackend.security.fliter.handle.JsonRegisterSuccessHandler;
+import lookaroundBackend.security.fliter.handle.JwtAccessDeniedHandler;
 import lookaroundBackend.security.provider.JwtAuthenticationProvider;
 import lookaroundBackend.service.UserManageService;
 import lookaroundBackend.utils.EnumGrantedAuthority;
@@ -51,10 +52,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
                 // .antMatchers(HttpMethod.POST, "/user/register").permitAll()
                 .antMatchers("/**/login", "/**/register").permitAll()
-                .antMatchers(HttpMethod.GET, "/hello").hasRole(EnumGrantedAuthority.ADMIN.getRole())
+                .antMatchers("/hello").hasRole(EnumGrantedAuthority.ADMIN.getRole())
                 .anyRequest().hasRole(EnumGrantedAuthority.USER.getRole())
             .and()
-                .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
+                .exceptionHandling()
+                .accessDeniedHandler(accessDeniedHandler())
+                // .accessDeniedPage("/error")
             .and()
                 .addFilterAt(jsonLoginFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(jsonRegisterFilter(), UsernamePasswordAuthenticationFilter.class)
@@ -62,8 +65,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private AccessDeniedHandler accessDeniedHandler() {
-        //TODO
-        return null;
+        return new JwtAccessDeniedHandler();
     }
 
     /**
